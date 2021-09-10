@@ -70,5 +70,11 @@ Neuromusculoskeletal model:
 - edlut
 - This is a tricky model. It contains three items, a musculoskeletal model (basically, a model of a human upper body's sekleton, with only the right shoulder and elbow joints moving), a cerebellar model, and a spinal cord model. Internally, the musculoskeletal model is simulated in OpenSim, and the cerebellar and spinal cord model control control the muscles that move the forearm and upper arm.
 - Porting problems: We use workd_step_control for synchronization again, but here some of the code is in C++, not python. As far as I'm aware, there's no IBA C++ module available at the moment. 
-- Input: None. The muscle model is only controlled via the cerebellar and spinal cord models, and those are internal to the model
-- Output: 
+- See README in edlut for details about setup and installation
+- NOTE: The original files had many references to fixed absolute locations inside the filesystem. This made running the program difficult, because most files weren't in their expected locations. I should have fixed all of them, but you could run "grep -nr '/home/'" to check if I missed any.
+- INSTALLATION ADDENDUM: Take a look at build.sh to see how I installed EDLUT. The original version had it installed at some random location in the filesystem, which made debugging difficult. By running the 
+autoconf
+./configure ....
+make ....
+make install ....
+commands like this, EDLUT is installed in the devel directory of this ROS workspace, and can be easily found by ROS nodes
