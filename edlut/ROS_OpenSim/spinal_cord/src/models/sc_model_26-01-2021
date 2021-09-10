@@ -1,0 +1,7 @@
+Muscles Ia_delay Ia_antagonist Ia_weight recip_weights
+TRIlong ext BIClong 30 1.0 1.0
+TRIlat ext BICshort,BRA 30 1.0 1.0
+TRImed ext BICshort,BRA 30 1.0 1.0
+BIClong flex TRIlong 30 1.0 0.5
+BICshort flex TRIlat,TRImed 30 1.0 0.5
+BRA flex TRIlat,TRImed 30 1.0 0.5

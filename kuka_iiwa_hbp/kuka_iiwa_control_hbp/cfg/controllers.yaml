@@ -1,0 +1,101 @@
+# Publish all joint states -----------------------------------
+joint_state_controller:
+  type: joint_state_controller/JointStateController
+  publish_rate: 200
+
+# Effort Velocity controllers
+iiwa_pd_velocity_controller:
+  type: velocity_controllers/JointGroupVelocityController
+  joints:
+    - iiwa_joint_1
+    - iiwa_joint_2
+    - iiwa_joint_3
+    - iiwa_joint_4
+    - iiwa_joint_5
+    - iiwa_joint_6
+    - iiwa_joint_7
+  gains:
+    iiwa_joint_1:
+      pid: {p: 80000, i: 0, d: 1000}
+    iiwa_joint_2:
+      pid: {p: 80000, i: 0, d: 1000}
+    iiwa_joint_3:
+      pid: {p: 50000, i: 0, d: 1000}
+    iiwa_joint_4:
+      pid: {p: 50000, i: 0, d: 1000}
+    iiwa_joint_5:
+      pid: {p: 30000, i: 0, d: 1000}
+    iiwa_joint_6:
+      pid: {p: 20000, i: 0, d: 1000}
+    iiwa_joint_7:
+      pid: {p: 20000, i: 0, d: 1000}
+
+
+# Effort Position controllers
+iiwa_pos_effort_controller:
+  # type: effort_controllers/JointGroupPositionController
+  type: effort_controllers/JointGroupPositionController
+  joints:
+    - iiwa_joint_1
+    - iiwa_joint_2
+    - iiwa_joint_3
+    - iiwa_joint_4
+    - iiwa_joint_5
+    - iiwa_joint_6
+    - iiwa_joint_7
+  iiwa_joint_1:
+    pid: {p: 5000, i: 1, d: 120}
+  iiwa_joint_2: 
+    pid: {p: 5000, i: 1, d: 120}
+  iiwa_joint_3: 
+    pid: {p: 2000, i: 1, d: 10}
+  iiwa_joint_4:
+    pid: {p: 2000, i: 1, d: 10}
+  iiwa_joint_5:
+    pid: {p: 500, i: 1, d: 4}
+  iiwa_joint_6:
+    pid: {p: 500, i: 1, d: 4}
+  iiwa_joint_7:
+    pid: {p: 100, i: 1, d: 4}
+
+  # iiwa_joint_1:
+  #   pid: {p: 2000, i: 0, d: 200}
+  # iiwa_joint_2: 
+  #   pid: {p: 1000, i: 0, d: 200}
+  # iiwa_joint_3: 
+  #   pid: {p: 800, i: 0, d: 160}
+  # iiwa_joint_4:
+  #   pid: {p: 800, i: 0, d: 160}
+  # iiwa_joint_5:
+  #   pid: {p: 500, i: 0, d: 100}
+  # iiwa_joint_6:
+  #   pid: {p: 200, i: 0, d: 40}
+  # iiwa_joint_7:
+  #   pid: {p: 100, i: 0, d: 20}
+
+# Gripper
+grasp_effort_controller:
+  type: effort_controllers/JointGroupPositionController
+  joints:
+    - gripper_left_joint
+    - gripper_right_joint
+  gripper_left_joint: 
+    pid: {p: 2000, i: 1, d: 10, i_clamp_min: -10000, i_clamp_max: 10000}
+  gripper_right_joint: 
+    pid: {p: 2000, i: 1, d: 10, i_clamp_min: -10000, i_clamp_max: 10000}
+  
+
+# Effort torque controllers
+# Arm
+iiwa_effort_controller:
+  type: effort_controllers/JointGroupEffortController
+  joints:
+    - iiwa_joint_1
+    - iiwa_joint_2
+    - iiwa_joint_3
+    - iiwa_joint_4
+    - iiwa_joint_5
+    - iiwa_joint_6
+    - iiwa_joint_7
+
+    

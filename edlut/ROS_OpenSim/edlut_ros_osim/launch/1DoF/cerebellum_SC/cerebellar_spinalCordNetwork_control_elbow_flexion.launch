@@ -1,0 +1,609 @@
+<!-- Cerebellar feedback control loop of elbow flexion -->
+
+<launch>
+
+<param name="use_sim_time" value="true" type="bool" />
+<param name="reference_time" value="0.0" type="double" />
+<param name="wireless_simulation" value="false" type="bool" />
+
+<!-- SYNCHRONIZER NODE
+When using simulation time it synchronizes all the other nodes so they all run at the sime time stamps.
+If runnning in real time the synchronizer node will shutdown after the robot has been enabled.
+  -Clock_topics: clock signals published by the other nodes for synchronization purposes
+  -Checking_frequency: rate (Hz) at which the synchronizer checks if the other nodes have finished the current time step
+  -Step_time: size (seconds) of every simulated time step -->
+<node pkg="edlut_ros_osim" name="synchronizer_node" type="synchronizer_node" output="screen">
+  <param name="clock_topic" value="edlut_ros_osim/clockConfirmation" type="str" />
+  <param name="number_of_nodes" value="7" type="int" />
+  <param name="checking_frequency" value="10000.0" type="double" />
+  <param name="step_time" value="0.002" type="double" />
+</node>
+
+
+<!-- TRAJECTORY FROM FILE GENERATOR NODE
+It generates a trajectory (position and velocity per joint) reading it from
+a .txt file in the format:
+  J0 J1 J2 J3 J4 ...
+  J0 J1 J2 J3 J4 ...
+  .
+  .
+  J0 J1 J2 J3 J4 ...
+Each line contains the position/velocity for each joint. Each line corresponds to
+a sample of the trajectory. One file for position, one file for velocity.
+This node reads the files and publishes the trajectory on the desired position
+and desired velocity topics. A trajectory is generated for every joint (joint_list param).
+The node also generates a control signal and avertises it (control_topic) to notify when the different learning trials start.
+Total number of trials and their length (seconds) is also specified.
+"and_muscle_activation" Version: it also allows to read and publish the precomputed muscle activation to achieve
+a desired trajectory (obtained using the Static Optimization tool). Used for the feedforward control loop, specifying the
+muscle_activation_file_name and muscle_activation_topic parameters. If not set, they are not used (feedback control loop) -->
+<node pkg="edlut_ros_osim" name="q_trajectory_generator" type="q_trajectory_generator_node_compactDelay_and_muscle_activation" output="screen" clear_params="true">
+  # Define private parameters for the EDLUT simulation
+  <param name="number_of_trials" value="1" type="int" />
+  <param name="trial_length" value="10000" type="double" />
+  <param name="joint_state_topic" value="robot/joint_states" type="str" />
+  <param name="update_frequency" value="500.0" type="double" />
+  <param name="samples" value="1500" type="int" />
+  <param name="trajectory_frequency" value="0.333333333333333333333333333333333333333333333333333333333333333" type="double" />
+  <param name="positions_file_name" value="$(find edlut_ros_osim)/elbow_flexion_trajectory/elbow_flexion_trajectory_joint_position_rad_oneJoint.txt" type="str" />
+  <param name="velocities_file_name" value="$(find edlut_ros_osim)/elbow_flexion_trajectory/elbow_flexion_trajectory_joint_velocity_rad_oneJoint.txt" type="str" />
+  <rosparam param="joint_list">
+    [r_elbow_flexion]
+  </rosparam>
+  <rosparam param="max_pos_amplitude">
+    [1.0, 150.0]
+  </rosparam>
+  <rosparam param="min_pos_amplitude">
+    [0.0, 0.0]
+  </rosparam>
+  <rosparam param="max_vel_amplitude">
+    [1.0, 250.0]
+  </rosparam>
+  <rosparam param="min_vel_amplitude">
+    [-1.0, 250.0]
+  </rosparam>
+  <param name="desired_position_topic" value="edlut_ros_osim/desired_position" type="str" />
+  <param name="desired_velocity_topic" value="edlut_ros_osim/desired_velocity" type="str" />
+  <param name="control_topic" value="edlut_ros_osim/in_trial" type="str" />
+  <!-- <param name="joint_command_topic" value="robot/limb/left/joint_command" type="str" /> -->
+</node>
+
+
+<!-- RBF NODES
+These nodes perform the conversion analogue-to-spike of the sensorial signals:
+desired and current position, and desired and current velocity.
+The state of each joint corresponds to a group of 40 neurons. Each group is then
+subdivided into subgroups of 10 neurons each (i.e. 10 neurons per joint for
+desired position, 10 neurons per joint for current position, 10 neurons per
+joint for desired velocity, 10 neurons per joint for current velocity).
+There are 4 nodes: 2 for position (one desired, one current)
+                   2 for velocity (one desired, one current)
+The range of neurons used for each joint, the range of the analogue sensorial
+signal to be encoded and the maximum firing rate of the neurons are specified.
+The delay parameter is used to mimic the afferent delay (50 ms).
+CompactDelay version: the node takes into account the delay of each of the messages
+received in order to translate the analogue info into spikes.
+-->
+<!-- RBF DESIRED POSITION encoding module -->
+<node pkg="edlut_ros_osim" name="rbf_node_desired_position" type="rbf_node_sync_compactDelay_EventDriven" output="screen" clear_params="true">
+  # Define private parameters for the EDLUT simulation
+  <param name="input_topic" value="edlut_ros_osim/desired_position" type="str" />
+  <param name="output_topic" value="edlut_ros_osim/simulation/input_spike" type="str" />
+  <param name="control_topic" value="edlut_ros_osim/in_trial" type="str" />
+  <param name="clock_topic" value="edlut_ros_osim/clockConfirmation" type="str" />
+  <rosparam param="joint_list">
+    [r_elbow_flexion]
+  </rosparam>
+  <rosparam param="min_neuron_index_list">
+    [0]
+  </rosparam>
+  <rosparam param="max_neuron_index_list">
+    [9]
+  </rosparam>
+  <rosparam param="min_value_list">
+     [0.43]
+  </rosparam>
+  <rosparam param="max_value_list">
+    [2.47]
+  </rosparam>
+  <rosparam param="max_spike_frequency_list">
+    [500.0]
+  </rosparam>
+  <rosparam param="overlapping_factor_list">
+    [0.500000000001]
+  </rosparam>
+  <param name="sampling_frequency" value="500.1" type="double" />
+  <param name="checking_frequency" value="1000.0" type="double" />
+  <param name="delay" value="0.050" type="double" />
+</node>
+<!-- RBF CURRENT POSITION encoding module -->
+<node pkg="edlut_ros_osim" name="rbf_node_current_position" type="rbf_node_sync_compactDelay_EventDriven" output="screen" clear_params="true">
+  # Define private parameters for the EDLUT simulation
+  <param name="input_topic" value="edlut_ros_osim/current_position" type="str" />
+  <param name="output_topic" value="edlut_ros_osim/simulation/input_spike" type="str" />
+  <param name="control_topic" value="edlut_ros_osim/in_trial" type="str" />
+  <param name="clock_topic" value="edlut_ros_osim/clockConfirmation" type="str" />
+  <rosparam param="joint_list">
+    [r_elbow_flexion]
+  </rosparam>
+  <rosparam param="min_neuron_index_list">
+    [10]
+  </rosparam>
+  <rosparam param="max_neuron_index_list">
+    [19]
+  </rosparam>
+  <rosparam param="min_value_list">
+     [0.3]
+  </rosparam>
+  <rosparam param="max_value_list">
+    [2.6]
+  </rosparam>
+  <rosparam param="max_spike_frequency_list">
+    [500.0]
+  </rosparam>
+  <rosparam param="overlapping_factor_list">
+    [0.500000000001]
+  </rosparam>
+  <param name="sampling_frequency" value="500.1" type="double" />
+  <param name="checking_frequency" value="1000.0" type="double" />
+  <param name="delay" value="0.050" type="double" />
+</node>
+<!-- RBF DESIRED VELOCITY encoding module -->
+<node pkg="edlut_ros_osim" name="rbf_node_desired_velocity" type="rbf_node_sync_compactDelay_EventDriven" output="screen" clear_params="true">
+  # Define private parameters for the EDLUT simulation
+  <param name="input_topic" value="edlut_ros_osim/desired_velocity" type="str" />
+  <param name="output_topic" value="edlut_ros_osim/simulation/input_spike" type="str" />
+  <param name="control_topic" value="edlut_ros_osim/in_trial" type="str" />
+  <param name="clock_topic" value="edlut_ros_osim/clockConfirmation" type="str" />
+  <rosparam param="joint_list">
+    [r_elbow_flexion]
+  </rosparam>
+  <rosparam param="min_neuron_index_list">
+    [20]
+  </rosparam>
+  <rosparam param="max_neuron_index_list">
+    [29]
+  </rosparam>
+  <rosparam param="min_value_list">
+    [-3.83]
+  </rosparam>
+  <rosparam param="max_value_list">
+    [3.8301]
+  </rosparam>
+  <rosparam param="max_spike_frequency_list">
+    [500.0]
+  </rosparam>
+  <rosparam param="overlapping_factor_list">
+    [0.500000000001]
+  </rosparam>
+  <param name="sampling_frequency" value="500.1" type="double" />
+  <param name="checking_frequency" value="1000.0" type="double" />
+  <param name="delay" value="0.050" type="double" />
+</node>
+<!-- RBF CURRENT VELOCITY encoding module -->
+<node pkg="edlut_ros_osim" name="rbf_node_current_velocity" type="rbf_node_sync_compactDelay_EventDriven" output="screen" clear_params="true">
+  # Define private parameters for the EDLUT simulation
+  <param name="input_topic" value="edlut_ros_osim/current_velocity" type="str" />
+  <param name="output_topic" value="edlut_ros_osim/simulation/input_spike" type="str" />
+  <param name="control_topic" value="edlut_ros_osim/in_trial" type="str" />
+  <param name="clock_topic" value="edlut_ros_osim/clockConfirmation" type="str" />
+  <rosparam param="joint_list">
+    [r_elbow_flexion]
+  </rosparam>
+  <rosparam param="min_neuron_index_list">
+    [30]
+  </rosparam>
+  <rosparam param="max_neuron_index_list">
+    [39]
+  </rosparam>
+  <rosparam param="min_value_list">
+    [-4.0]
+  </rosparam>
+  <rosparam param="max_value_list">
+    [4.001]
+  </rosparam>
+  <rosparam param="max_spike_frequency_list">
+    [500.0]
+  </rosparam>
+  <rosparam param="overlapping_factor_list">
+    [0.500000000001]
+  </rosparam>
+  <param name="sampling_frequency" value="500.1" type="double" />
+  <param name="checking_frequency" value="1000.0" type="double" />
+  <param name="delay" value="0.050" type="double" />
+</node>
+
+
+<!-- FULL STATE NODE
+This node generates a combined signal of the arm current state and desired state.
+To do so it ensembles the current state (position and velocity) of the arm with
+the corresponding desired state taking into account the sensorial delay and the delay
+associated to each of the arm Current State messages received.
+That is: a current state message at time t with a delay t_d corresponds to
+the desired state message generated at t - sensorial_delay - t_d. -->
+<node pkg="edlut_ros_osim" name="full_state_node" type="full_state_node" output="screen" clear_params="true">
+  <param name="desired_position_topic" value="edlut_ros_osim/desired_position" type="str" />
+  <param name="desired_velocity_topic" value="edlut_ros_osim/desired_velocity" type="str" />
+  <param name="current_position_topic" value="edlut_ros_osim/current_position" type="str" />
+  <param name="current_velocity_topic" value="edlut_ros_osim/current_velocity" type="str" />
+  <param name="output_topic" value="edlut_ros_osim/full_state" type="str" />
+  <param name="sampling_frequency" value="500.0" type="double" />
+  <rosparam param="joint_list">
+    [r_elbow_flexion]
+  </rosparam>
+  <param name="sensorial_delay" value="0.050" type="double" />
+</node>
+
+<!-- ERROR ESTIMATION NODE
+This node generates the error signal comparing the desired vs current position
+and velocity. The gain of each signal (position and velocity) to the total error
+can be specified. The error can be calculated for the joints specified in
+joint_list param. -->
+<node pkg="edlut_ros_osim" name="error_node" type="error_estimator_node_full_state_compactDelay" output="screen" clear_params="true">
+  <param name="full_state_topic" value="edlut_ros_osim/full_state" type="str" />
+  <param name="output_topic" value="edlut_ros_osim/error_estimation" type="str" />
+  <param name="sampling_frequency" value="500.0" type="double" />
+  <rosparam param="joint_list">
+    [r_elbow_flexion]
+  </rosparam>
+  <rosparam param="error_position_gain">
+    [3.0]
+  </rosparam>
+  <rosparam param="error_velocity_gain">
+    [3.0]
+  </rosparam>
+</node>
+
+
+<!-- POISSON GENERATOR NODE
+This node makes the analogue-to-spike conversion of the error signal.
+The min_values and max_values specify the minimun and maximum error values
+corresponding to the minimum and maximum spiking frequency rates. Below the
+min_value the spiking frequency will be the min_spike_frequency, above the
+max_value the spiking frequency will be the max_spike_frequency.
+CompactDelay version: the node takes into account the delay of each of the messages
+received in order to translate the analogue info into spikes.
+-->
+<node pkg="edlut_ros_osim" name="pg_error_node" type="poisson_generator_node_delay_compactDelay_EventDriven" output="screen">
+  <param name="input_topic" value="edlut_ros_osim/error_estimation" type="str" />
+  <param name="output_topic" value="edlut_ros_osim/simulation/input_spike" type="str" />
+  <param name="control_topic" value="edlut_ros_osim/in_trial" type="str" />
+  <param name="clock_topic" value="edlut_ros_osim/clockConfirmation" type="str" />
+  <rosparam param="joint_list">
+    [r_elbow_flexion]
+  </rosparam>
+  <rosparam param="min_neuron_index_list_pos">
+    [40]
+  </rosparam>
+  <rosparam param="max_neuron_index_list_pos">
+    [89]
+  </rosparam>
+  <rosparam param="min_neuron_index_list_neg">
+    [90]
+  </rosparam>
+  <rosparam param="max_neuron_index_list_neg">
+    [139]
+  </rosparam>
+  <param name="sampling_frequency" value="500.0" type="double" />
+  <param name="checking_frequency" value="1000.0" type="double" />
+  <rosparam param="min_value_list">
+    [0.001]
+  </rosparam>
+  <rosparam param="max_value_list">
+    <!-- [0.01] -->
+    [0.1]
+    <!-- Agressive IO -->
+    <!-- [0.005] -->
+  </rosparam>
+  <rosparam param="max_spike_frequency_list">
+    [10.0]
+  </rosparam>
+  <rosparam param="min_spike_frequency_list">
+    [1.0]
+  </rosparam>
+  <rosparam param="overlapping_factor_list">
+    [1.0]
+  </rosparam>
+  <param name="seed" value="1234" type="int" />
+  <param name="delay" value="0.050" type="double" />
+</node>
+
+<!-- EDLUT SIMULATOR NODE
+Launches EDLUT simulator with the specified network and weight files.
+Publishes EDLUT generated spikes to output_topic.
+Also provides with EDLUT parameter configuration
+-->
+<node pkg="edlut_ros_osim" name="edlut_simulator_node" type="simulator_node2" output="screen">
+  # Define private parameters for the EDLUT simulation
+  <!-- EDLUT NETWORK FIlE: -->
+    <param name="network_file" value="$(find edlut_ros_osim)/elbow_flexion_trajectory/Network_1_joint_10MF_per_RBF_4MF_per_GrC_100DCN.cfg" type="str" />
+  <!-- LEARNING FROM SCRATCH WEIGHTS FILE: -->
+    <!-- <param name="weight_file" value="$(find edlut_ros_osim)/elbow_flexion_trajectory/Weights_1_joint_10MF_per_RBF_4MF_per_GrC_100DCN.cfg" type="str" /> -->
+  <!-- ALREADY LEARNT TRAJECTORY WEIGHTS FILE: -->
+    <param name="weight_file" value="$(find edlut_ros_osim)/elbow_flexion_trajectory/output_weight_cerebellumSC_26-01-2021.dat" type="str" />
+  <param name="input_topic" value="edlut_ros_osim/simulation/input_spike" type="str" />
+  <param name="output_topic" value="edlut_ros_osim/simulation/output_spike" type="str" />
+  <param name="clock_topic" value="edlut_ros_osim/clockConfirmation" type="str" />
+  <param name="Rt1_gap" value="0.70" type="double" />
+  <param name="Rt2_gap" value="0.90" type="double" />
+  <param name="Rt3_gap" value="0.95" type="double" />
+  <param name="number_threads" value="2" type="int" />
+  <param name="step_time" value="0.002" type="double" />
+  <param name="max_spike_buffered" value="100000000" type="int" />
+  <param name="sensorial_delay" value="0.05" type="double" />
+  <param name="sensorial_delay_margin" value="0.9" type="double" />
+  <param name="checking_frequency" value="1000.0" type="double" />
+  <!-- <param name="motor_delay" value="0.050" type="double" /> -->
+  <param name="motor_delay" value="0.030" type="double" />
+  <param name="save_weight_period" value="0.0" type="double" />
+  <param name="rt_statistics_period" value="10.0" type="double" />
+  <param name="input_delay_topic" value="edlut_ros_osim/current_position" type="str" />
+</node>
+
+
+<!-- SPIKE DECODER NODE COMPACT FUTURE
+This node makes the Spike-to-analogue conversion of the cerebellar output
+activity. The DCN layer neural activity is translated into torque commands.
+The delta_spike (pos and neg stand for positive and negative torque values)
+parameters provide a specific conversion factor for each joint, accounting for
+their mass and relative position.
+In case of a simulated wireless scenario this node adds a delay to the generated
+torque commands.
+-->
+<node pkg="edlut_ros_osim" name="spike_decoder_node_agonist_antagonist" type="spike_decoder_node_compact_agonist_antagonist" output="screen">
+  <param name="input_topic" value="edlut_ros_osim/simulation/output_spike" type="str" />
+  <param name="output_topic" value="edlut_ros_osim/cerebellum_output" type="str" />
+  <rosparam param="joint_list">
+    [r_elbow_flexion]
+  </rosparam>
+  <rosparam param="min_neuron_index_list_pos">
+    [10240]
+  </rosparam>
+  <rosparam param="max_neuron_index_list_pos">
+    [10289]
+  </rosparam>
+  <rosparam param="min_neuron_index_list_neg">
+    [10290]
+  </rosparam>
+  <rosparam param="max_neuron_index_list_neg">
+    [10339]
+  </rosparam>
+  <param name="sampling_frequency" value="500.0" type="double" />
+  <param name="tau_time_constant" value="0.0" type="double" />
+  <rosparam param="delta_spike_list_pos">
+    [0.55]
+  </rosparam>
+  <rosparam param="delta_spike_list_neg">
+    [0.55]
+  </rosparam>
+  <rosparam param="torque_max_pos">
+    [15.0]
+  </rosparam>
+  <rosparam param="torque_max_neg">
+    [-15.0]
+  </rosparam>
+  <param name="min_agonist" value="0.0" type="double" />
+  <param name="max_agonist" value="1.0" type="double" />
+  <param name="min_antagonist" value="0.0" type="double" />
+  <param name="max_antagonist" value="1.0" type="double" />
+  <param name="delay_topic" value="/edlut_ros/artificial_delay" type="str" />
+</node>
+
+
+<!-- ROS-OPENSIM INTERFACE -->
+  <arg name="osim_visualization" default="true"/>
+  <!-- <node pkg="edlut_ros_osim" name="middleware" type="ros_osim_middleware_osim_environment_spinal_network.py" output="screen"> -->
+  <node pkg="edlut_ros_osim" name="middleware" type="ros_osim_middleware_osim_environment_pid.py" output="screen">
+    <!-- <param name="osim_model" value="$(find edlut_ros_osim)/../models/arm26_hand_fixed_shoulder.osim" type="str" /> -->
+    <param name="osim_model" value="$(find edlut_ros_osim)/../models/1dof_Millard.osim" type="str" />
+    <param name="osim_visualization" value="$(arg osim_visualization)" type="bool" />
+    <param name="sc_model_file" value="$(find edlut_ros_osim)/../spinal_cord/src/models/spinal_model_net" type="str" />
+    <param name="net_graph_file" value="$(find edlut_ros_osim)/../spinal_cord/src/models/net.graphml" type="str" />
+    <rosparam param="joint_list">
+      [r_elbow_flexion]
+    </rosparam>
+    <rosparam param="muscle_list">
+      [TRIlong,TRIlat,TRImed,BIClong,BICshort,BRA]
+    </rosparam>
+    <rosparam param="antagonist_muscles">
+      [TRIlong,TRIlat,TRImed]
+    </rosparam>
+    <rosparam param="agonist_muscles">
+      [BIClong,BICshort,BRA]
+    </rosparam>
+    <param name="joint_position_topic" value="edlut_ros_osim/current_position" type="str" />
+    <param name="joint_velocity_topic" value="edlut_ros_osim/current_velocity" type="str" />
+    <param name="joint_acceleration_topic" value="edlut_ros_osim/current_acceleration" type="str" />
+    <param name="current_muscle_activation_topic" value="edlut_ros_osim/current_muscle_activation" type="str" />
+    <param name="input_muscle_activation_topic" value="edlut_ros_osim/command_muscle_activation" type="str" />
+    <param name="input_agonist_antagonist_topic" value="edlut_ros_osim/cerebellum_output" type="str" />
+    <param name="final_muscle_excitation_topic" value="edlut_ros_osim/muscle_excitation" type="str" />
+    <param name="sampling_frequency" value="500.0" type="double" />
+    <param name="activation_exponent" value="2.0" type="double" />
+    <param name="step_size" value="0.002" type="double" />
+    <param name="max_iterations" value="2000.0" type="double" />
+    <param name="integrator_accuracy" value="1.0e-3" type="double" />
+    <param name="clock_topic" value="edlut_ros_osim/clockConfirmation" type="str" />
+    <param name="marker_kinematics_topic" value="edlut_ros_osim/marker_kinematics" type="str" />
+    <param name="hand_contact_sensor_topic" value="/mixamorig/RightHandBox/contact_sensor" type="str" />
+    <param name="mixamorig_RightHandPalm_sensor" value="/mixamorig/contact_sensor/mixamorig_RightHandPalm" type="str" />
+    <param name="mixamorig_RightHandMiddle1_sensor" value="/mixamorig/contact_sensor/mixamorig_RightHandMiddle1" type="str" />
+    <param name="mixamorig_RightHandMiddle2_sensor" value="/mixamorig/contact_sensor/mixamorig_RightHandMiddle2" type="str" />
+    <param name="mixamorig_RightHandMiddle3_sensor" value="/mixamorig/contact_sensor/mixamorig_RightHandMiddle3" type="str" />
+    <param name="mixamorig_RightHandIndex1_sensor" value="/mixamorig/contact_sensor/mixamorig_RightHandIndex1" type="str" />
+    <param name="mixamorig_RightHandIndex2_sensor" value="/mixamorig/contact_sensor/mixamorig_RightHandIndex2" type="str" />
+    <param name="mixamorig_RightHandIndex3_sensor" value="/mixamorig/contact_sensor/mixamorig_RightHandIndex3" type="str" />
+    <param name="mixamorig_RightHandRing1_sensor" value="/mixamorig/contact_sensor/mixamorig_RightHandRing1" type="str" />
+    <param name="mixamorig_RightHandRing2_sensor" value="/mixamorig/contact_sensor/mixamorig_RightHandRing2" type="str" />
+    <param name="mixamorig_RightHandRing3_sensor" value="/mixamorig/contact_sensor/mixamorig_RightHandRing3" type="str" />
+    <param name="mixamorig_RightHandPinky1_sensor" value="/mixamorig/contact_sensor/mixamorig_RightHandPinky1" type="str" />
+    <param name="mixamorig_RightHandPinky2_sensor" value="/mixamorig/contact_sensor/mixamorig_RightHandPinky2" type="str" />
+    <param name="mixamorig_RightHandPinky3_sensor" value="/mixamorig/contact_sensor/mixamorig_RightHandPinky3" type="str" />
+    <rosparam param="marker_list">
+      [r_hand_com]
+    </rosparam>
+  </node>
+
+
+
+<!-- PLOT TOPICS -->
+
+<!-- POSITION MAE
+This node creates an animated graph of the position Mean Absolute Error (MAE)
+per trial (trial duration specified). The MAE represented is the mean of the
+specified joints. If only one joint is specified, that joint's MAE is plotted. -->
+<node pkg="edlut_ros_osim" name="PMAE" type="MAE_position.py" output="screen">
+  <param name="full_state_topic" value="edlut_ros_osim/full_state" type="str" />
+  <param name="duration_trial" value="3" type="double" />
+  <rosparam param="joint_list">
+    [r_elbow_flexion]
+  </rosparam>
+  <param name="figure_name" value="Position MAE" type="str" />
+  <param name="refresh_rate" value="1.0" type="double" />
+</node>
+
+
+<!-- Plot the desired vs current elbow position and velocity
+  <node pkg="rqt_plot" name="plot_elbow" type="rqt_plot"
+        args="edlut_ros_osim/current_position/data[0]
+        edlut_ros_osim/desired_position/data[0]
+        edlut_ros_osim/current_velocity/data[0]
+        edlut_ros_osim/desired_velocity/data[0]"/>
+-->
+
+<!--
+<node pkg="rqt_plot" name="plot_elbow_excitation" type="rqt_plot"
+      args="edlut_ros_osim/cerebellum_output/agonist[0]
+      edlut_ros_osim/cerebellum_output/antagonist[0]
+      edlut_ros_osim/muscle_excitation/data[0]
+      edlut_ros_osim/muscle_excitation/data[1]
+      edlut_ros_osim/muscle_excitation/data[2]
+      edlut_ros_osim/muscle_excitation/data[3]
+      edlut_ros_osim/muscle_excitation/data[4]
+      edlut_ros_osim/muscle_excitation/data[5]
+      edlut_ros_osim/full_state/desired_velocity[0]
+      edlut_ros_osim/full_state/current_velocity[0]"/>
+-->
+
+      <!-- Plot the desired vs current elbow position and velocity -->
+<!--
+        <node pkg="rqt_plot" name="plot_elbow" type="rqt_plot"
+              args="edlut_ros_osim/full_state/desired_position[0]
+              edlut_ros_osim/full_state/current_position[0]
+              edlut_ros_osim/perturbation/data[0]
+              edlut_ros_osim/marker_kinematics/position_x[0]
+              edlut_ros_osim/marker_kinematics/position_y[0]"/>
+-->
+
+<!--
+<node pkg="rqt_plot" name="plot_elbow_excitation_" type="rqt_plot"
+      args="edlut_ros_osim/full_state/desired_velocity[0]
+      edlut_ros_osim/full_state/current_velocity[0]"/>
+-->
+<!--
+  <node pkg="rqt_plot" name="plot_a" type="rqt_plot"
+        args="edlut_ros_osim/torque_cerebellum/data[0]
+        computed_muscle_activation/data[0]
+        computed_muscle_activation/data[1]
+        computed_muscle_activation/data[2]
+        computed_muscle_activation/data[3]
+        computed_muscle_activation/data[4]
+        computed_muscle_activation/data[5]"/>
+-->
+
+
+<!-- RASTER PLOT
+The following nodes plot the spike activity of each cerebellar layer:
+Mossy Fibers, Inferior Olive, Granular Cells, Purkinje Cells and DCN.
+To do so, the neuron range for each layer is specified.-->
+<!-- MOSSY FIBERS -->
+<node pkg="edlut_ros_osim" name="MF" type="RasterPlot.py" output="screen">
+  <param name="input_topic" value="edlut_ros_osim/simulation/input_spike" type="str" />
+  <param name="figure_name" value="MF" type="str" />
+  <param name="min_neuron_index" value="1" type="int" />
+  <param name="max_neuron_index" value="39" type="int" />
+  <param name="refresh_rate" value="1.0" type="double" />
+</node>
+
+<!-- COMPROBAR INDICE DE NEURONA = 0. PETA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
+
+<!-- INFERIOR OLIVE -->
+<node pkg="edlut_ros_osim" name="IO" type="RasterPlot.py" output="screen">
+  <param name="input_topic" value="edlut_ros_osim/simulation/input_spike" type="str" />
+  <param name="figure_name" value="IO" type="str" />
+  <param name="min_neuron_index" value="40" type="int" />
+  <param name="max_neuron_index" value="139" type="int" />
+  <param name="refresh_rate" value="1.0" type="double" />
+</node>
+
+
+<!-- GRANULAR CELLS -->
+<node pkg="edlut_ros_osim" name="GrC" type="RasterPlot.py" output="screen">
+  <param name="input_topic" value="edlut_ros_osim/simulation/output_spike" type="str" />
+  <param name="figure_name" value="GrC" type="str" />
+  <param name="min_neuron_index" value="140" type="int" />
+  <param name="max_neuron_index" value="10139" type="int" />
+  <param name="refresh_rate" value="1.0" type="double" />
+</node>
+
+
+<!-- PURKINJE CELLS -->
+<node pkg="edlut_ros_osim" name="PC" type="RasterPlot.py" output="screen">
+  <param name="input_topic" value="edlut_ros_osim/simulation/output_spike" type="str" />
+  <param name="figure_name" value="PC" type="str" />
+  <param name="min_neuron_index" value="10140" type="int" />
+  <param name="max_neuron_index" value="10239" type="int" />
+  <param name="refresh_rate" value="0.5" type="double" />
+</node>
+
+
+<!-- DCN CELLS -->
+<node pkg="edlut_ros_osim" name="DCN" type="RasterPlot.py" output="screen">
+  <param name="input_topic" value="edlut_ros_osim/simulation/output_spike" type="str" />
+  <param name="figure_name" value="Deep Cerebellar Nuclei" type="str" />
+  <param name="min_neuron_index" value="10240" type="int" />
+  <param name="max_neuron_index" value="10339" type="int" />
+  <param name="refresh_rate" value="0.5" type="double" />
+</node>
+
+
+<!-- MF CELLS & GrC CELLS
+<node pkg="edlut_ros_osim" name="MF_GrC" type="RasterPlot_2Entries.py" output="screen">
+  <param name="first_input_topic" value="edlut_ros_osim/simulation/input_spike" type="str" />
+  <param name="second_input_topic" value="edlut_ros_osim/simulation/output_spike" type="str" />
+  <param name="figure_name" value="MF and GrC" type="str" />
+  <param name="first_min_neuron_index" value="1" type="int" />
+  <param name="first_max_neuron_index" value="39" type="int" />
+  <param name="second_min_neuron_index" value="140" type="int" />
+  <param name="second_max_neuron_index" value="10139" type="int" />
+  <param name="refresh_rate" value="0.5" type="double" />
+</node>
+-->
+
+<!-- IO & DCN CELLS
+<node pkg="edlut_ros_osim" name="IO_DCN" type="RasterPlot_2Entries.py" output="screen">
+  <param name="first_input_topic" value="edlut_ros_osim/simulation/input_spike" type="str" />
+  <param name="second_input_topic" value="edlut_ros_osim/simulation/output_spike" type="str" />
+  <param name="figure_name" value="IO and DCN" type="str" />
+  <param name="first_min_neuron_index" value="40" type="int" />
+  <param name="first_max_neuron_index" value="139" type="int" />
+  <param name="second_min_neuron_index" value="10240" type="int" />
+  <param name="second_max_neuron_index" value="10339" type="int" />
+  <param name="refresh_rate" value="0.5" type="double" />
+</node>
+-->
+
+<!-- RECORD TOPICS TO ROSBAG FILE
+ <node pkg="rosbag" type="record" name="rosbag_record"
+       args="record -o $(find edlut_ros_osim)/rosbags/data
+       /edlut_ros_osim/desired_position
+       /edlut_ros_osim/desired_velocity
+       /edlut_ros_osim/current_position
+       /edlut_ros_osim/current_velocity
+       /edlut_ros_osim/full_state
+       /edlut_ros_osim/cerebellum_output
+       /edlut_ros_osim/muscle_excitation"
+       />
+-->
+
+</launch>

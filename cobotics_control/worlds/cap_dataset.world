@@ -1,0 +1,28 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <world name="default">
+    <state world_name="default">
+      <!-- <sim_time>0 0</sim_time>
+      <real_time>0 0</real_time>
+      <wall_time>0 0</wall_time>
+      <iterations>0</iterations> -->
+      <gravity>0 0 0</gravity>
+    </state>
+
+    <include>
+      <uri>model://iiwa_cap_link</uri>
+      <pose>0 0 0 0 -0 0</pose>
+    </include>
+
+    <include>
+      <uri>model://skeleton_forearm_cap</uri>
+      <pose>0 0 0 0 -0 0</pose>
+    </include>
+    <CapDataset>
+      <!-- <MeasureTimestep></MeasureTimestep> -->
+      <Robot>iiwa_link_cap</Robot>
+      <Forearm>skeleton_forearm_cap</Forearm>
+      <BindToXYPlane>1</BindToXYPlane>
+    </CapDataset>
+  </world>
+</sdf>

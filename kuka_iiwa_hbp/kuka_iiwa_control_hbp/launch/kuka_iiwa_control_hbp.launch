@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<launch>
+    <group ns="/iiwa">
+        <!-- Load joint controller configurations from YAML file to parameter server -->
+        <rosparam file="$(find kuka_iiwa_control_hbp)/cfg/controllers.yaml" command="load"/>
+
+        <!-- Load the controllers -->
+        <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+            output="screen" args="joint_state_controller iiwa_effort_controller grasp_effort_controller">
+            <param name="use_sim_time" type="bool" value="true"/>
+        </node>
+
+        <!-- Convert joint states to TF transforms for rviz, etc -->
+        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+            respawn="false" output="screen">
+            <param name="use_sim_time" type="bool" value="true"/>
+        </node>
+
+        <!-- Launch nodes -->
+        <node name="trajectory_generation" pkg="kuka_iiwa_control_hbp" type="trajectory_generation.py" respawn="false" output="screen" >
+            <param name="hz" type="int" value="100"/>
+            <param name="use_sim_time" type="bool" value="true"/>
+        </node>
+        <node name="controller" pkg="kuka_iiwa_control_hbp" type="controller.py" respawn="false" output="screen" >
+            <param name="hz" type="int" value="100"/>
+            <param name="use_sim_time" type="bool" value="true"/>
+        </node>
+    </group>    
+</launch>

@@ -1,0 +1,294 @@
+<?xml version='1.0' encoding='utf-8'?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <key attr.name="weight" attr.type="double" for="edge" id="d11" />
+  <key attr.name="weight" attr.type="float" for="edge" id="d10" />
+  <key attr.name="y" attr.type="float" for="node" id="d9" />
+  <key attr.name="init" attr.type="double" for="node" id="d8" />
+  <key attr.name="color" attr.type="string" for="node" id="d7" />
+  <key attr.name="y" attr.type="double" for="node" id="d6" />
+  <key attr.name="x" attr.type="double" for="node" id="d5" />
+  <key attr.name="D" attr.type="int" for="node" id="d4" />
+  <key attr.name="bias" attr.type="double" for="node" id="d3" />
+  <key attr.name="tau" attr.type="double" for="node" id="d2" />
+  <key attr.name="model" attr.type="string" for="node" id="d1" />
+  <key attr.name="name" attr.type="string" for="graph" id="d0" />
+  <graph edgedefault="directed">
+    <node id="arm_Mn_TRIlong">
+      <data key="d1">leaky</data>
+      <data key="d2">0.01</data>
+      <data key="d3">-0.5</data>
+      <data key="d4">10</data>
+      <data key="d5">-3.0</data>
+      <data key="d6">2.0</data>
+      <data key="d7">b</data>
+    </node>
+    <node id="arm_IaIn_TRIlong">
+      <data key="d1">leaky</data>
+      <data key="d2">0.01</data>
+      <data key="d3">-0.5</data>
+      <data key="d4">10</data>
+      <data key="d5">-3.0</data>
+      <data key="d6">4.0</data>
+      <data key="d7">m</data>
+    </node>
+    <node id="arm_Mn_TRIlat">
+      <data key="d1">leaky</data>
+      <data key="d2">0.01</data>
+      <data key="d3">-0.5</data>
+      <data key="d4">10</data>
+      <data key="d5">-1.0</data>
+      <data key="d6">2.0</data>
+      <data key="d7">b</data>
+    </node>
+    <node id="arm_IaIn_TRIlat">
+      <data key="d1">leaky</data>
+      <data key="d2">0.01</data>
+      <data key="d3">-0.5</data>
+      <data key="d4">10</data>
+      <data key="d5">-1.0</data>
+      <data key="d6">4.0</data>
+      <data key="d7">m</data>
+    </node>
+    <node id="arm_Mn_TRImed">
+      <data key="d1">leaky</data>
+      <data key="d2">0.01</data>
+      <data key="d3">-0.5</data>
+      <data key="d4">10</data>
+      <data key="d5">1.0</data>
+      <data key="d6">2.0</data>
+      <data key="d7">b</data>
+    </node>
+    <node id="arm_IaIn_TRImed">
+      <data key="d1">leaky</data>
+      <data key="d2">0.01</data>
+      <data key="d3">-0.5</data>
+      <data key="d4">10</data>
+      <data key="d5">1.0</data>
+      <data key="d6">4.0</data>
+      <data key="d7">m</data>
+    </node>
+    <node id="arm_TRIlong_Ia">
+      <data key="d1">sensory</data>
+      <data key="d5">-4.0</data>
+      <data key="d6">2.0</data>
+      <data key="d7">y</data>
+      <data key="d8">0.0</data>
+    </node>
+    <node id="arm_TRIlong_C">
+      <data key="d1">sensory</data>
+      <data key="d5">-3.0</data>
+      <data key="d6">0.0</data>
+      <data key="d7">k</data>
+      <data key="d8">0.0</data>
+    </node>
+    <node id="arm_TRIlat_Ia">
+      <data key="d1">sensory</data>
+      <data key="d5">-2.0</data>
+      <data key="d6">2.0</data>
+      <data key="d7">y</data>
+      <data key="d8">0.0</data>
+    </node>
+    <node id="arm_TRIlat_C">
+      <data key="d1">sensory</data>
+      <data key="d5">-1.0</data>
+      <data key="d6">0.0</data>
+      <data key="d7">k</data>
+      <data key="d8">0.0</data>
+    </node>
+    <node id="arm_TRImed_Ia">
+      <data key="d1">sensory</data>
+      <data key="d5">0.0</data>
+      <data key="d6">2.0</data>
+      <data key="d7">y</data>
+      <data key="d8">0.0</data>
+    </node>
+    <node id="arm_TRImed_C">
+      <data key="d1">sensory</data>
+      <data key="d5">1.0</data>
+      <data key="d6">0.0</data>
+      <data key="d7">k</data>
+      <data key="d8">0.0</data>
+    </node>
+    <node id="arm_Mn_BIClong">
+      <data key="d1">leaky</data>
+      <data key="d2">0.01</data>
+      <data key="d3">-0.5</data>
+      <data key="d4">10</data>
+      <data key="d5">-3.0</data>
+      <data key="d6">8.0</data>
+      <data key="d7">b</data>
+    </node>
+    <node id="arm_IaIn_BIClong">
+      <data key="d1">leaky</data>
+      <data key="d2">0.01</data>
+      <data key="d3">-0.5</data>
+      <data key="d4">10</data>
+      <data key="d5">-3.0</data>
+      <data key="d6">6.0</data>
+      <data key="d7">m</data>
+    </node>
+    <node id="arm_Mn_BICshort">
+      <data key="d1">leaky</data>
+      <data key="d2">0.01</data>
+      <data key="d3">-0.5</data>
+      <data key="d4">10</data>
+      <data key="d5">-1.0</data>
+      <data key="d6">8.0</data>
+      <data key="d7">b</data>
+    </node>
+    <node id="arm_IaIn_BICshort">
+      <data key="d1">leaky</data>
+      <data key="d2">0.01</data>
+      <data key="d3">-0.5</data>
+      <data key="d4">10</data>
+      <data key="d5">-1.0</data>
+      <data key="d6">6.0</data>
+      <data key="d7">m</data>
+    </node>
+    <node id="arm_Mn_BRA">
+      <data key="d1">leaky</data>
+      <data key="d2">0.01</data>
+      <data key="d3">-0.5</data>
+      <data key="d4">10</data>
+      <data key="d5">1.0</data>
+      <data key="d6">8.0</data>
+      <data key="d7">b</data>
+    </node>
+    <node id="arm_IaIn_BRA">
+      <data key="d1">leaky</data>
+      <data key="d2">0.01</data>
+      <data key="d3">-0.5</data>
+      <data key="d4">10</data>
+      <data key="d5">1.0</data>
+      <data key="d6">6.0</data>
+      <data key="d7">m</data>
+    </node>
+    <node id="arm_BIClong_Ia">
+      <data key="d1">sensory</data>
+      <data key="d5">-4.0</data>
+      <data key="d9">8.0</data>
+      <data key="d7">y</data>
+      <data key="d8">0.0</data>
+    </node>
+    <node id="arm_BIClong_C">
+      <data key="d1">sensory</data>
+      <data key="d5">-3.0</data>
+      <data key="d9">10.0</data>
+      <data key="d7">k</data>
+      <data key="d8">0.0</data>
+    </node>
+    <node id="arm_BICshort_Ia">
+      <data key="d1">sensory</data>
+      <data key="d5">-2.0</data>
+      <data key="d9">8.0</data>
+      <data key="d7">y</data>
+      <data key="d8">0.0</data>
+    </node>
+    <node id="arm_BICshort_C">
+      <data key="d1">sensory</data>
+      <data key="d5">-1.0</data>
+      <data key="d9">10.0</data>
+      <data key="d7">k</data>
+      <data key="d8">0.0</data>
+    </node>
+    <node id="arm_BRA_Ia">
+      <data key="d1">sensory</data>
+      <data key="d5">0.0</data>
+      <data key="d9">8.0</data>
+      <data key="d7">y</data>
+      <data key="d8">0.0</data>
+    </node>
+    <node id="arm_BRA_C">
+      <data key="d1">sensory</data>
+      <data key="d5">1.0</data>
+      <data key="d9">10.0</data>
+      <data key="d7">k</data>
+      <data key="d8">0.0</data>
+    </node>
+    <edge source="arm_IaIn_TRIlong" target="arm_Mn_BIClong">
+      <data key="d10">-2.0</data>
+    </edge>
+    <edge source="arm_IaIn_TRIlat" target="arm_Mn_BICshort">
+      <data key="d10">-2.0</data>
+    </edge>
+    <edge source="arm_IaIn_TRIlat" target="arm_Mn_BRA">
+      <data key="d10">-2.0</data>
+    </edge>
+    <edge source="arm_IaIn_TRImed" target="arm_Mn_BICshort">
+      <data key="d10">-2.0</data>
+    </edge>
+    <edge source="arm_IaIn_TRImed" target="arm_Mn_BRA">
+      <data key="d10">-2.0</data>
+    </edge>
+    <edge source="arm_TRIlong_Ia" target="arm_Mn_TRIlong">
+      <data key="d11">1.0</data>
+    </edge>
+    <edge source="arm_TRIlong_Ia" target="arm_IaIn_TRIlong">
+      <data key="d11">1.0</data>
+    </edge>
+    <edge source="arm_TRIlong_C" target="arm_Mn_TRIlong">
+      <data key="d11">1.0</data>
+    </edge>
+    <edge source="arm_TRIlat_Ia" target="arm_Mn_TRIlat">
+      <data key="d11">1.0</data>
+    </edge>
+    <edge source="arm_TRIlat_Ia" target="arm_IaIn_TRIlat">
+      <data key="d11">1.0</data>
+    </edge>
+    <edge source="arm_TRIlat_C" target="arm_Mn_TRIlat">
+      <data key="d11">1.0</data>
+    </edge>
+    <edge source="arm_TRImed_Ia" target="arm_Mn_TRImed">
+      <data key="d11">1.0</data>
+    </edge>
+    <edge source="arm_TRImed_Ia" target="arm_IaIn_TRImed">
+      <data key="d11">1.0</data>
+    </edge>
+    <edge source="arm_TRImed_C" target="arm_Mn_TRImed">
+      <data key="d11">1.0</data>
+    </edge>
+    <edge source="arm_IaIn_BIClong" target="arm_Mn_TRIlong">
+      <data key="d10">-2.0</data>
+    </edge>
+    <edge source="arm_IaIn_BICshort" target="arm_Mn_TRIlat">
+      <data key="d10">-2.0</data>
+    </edge>
+    <edge source="arm_IaIn_BICshort" target="arm_Mn_TRImed">
+      <data key="d10">-2.0</data>
+    </edge>
+    <edge source="arm_IaIn_BRA" target="arm_Mn_TRIlat">
+      <data key="d10">-2.0</data>
+    </edge>
+    <edge source="arm_IaIn_BRA" target="arm_Mn_TRImed">
+      <data key="d10">-2.0</data>
+    </edge>
+    <edge source="arm_BIClong_Ia" target="arm_Mn_BIClong">
+      <data key="d11">1.0</data>
+    </edge>
+    <edge source="arm_BIClong_Ia" target="arm_IaIn_BIClong">
+      <data key="d11">1.0</data>
+    </edge>
+    <edge source="arm_BIClong_C" target="arm_Mn_BIClong">
+      <data key="d11">1.0</data>
+    </edge>
+    <edge source="arm_BICshort_Ia" target="arm_Mn_BICshort">
+      <data key="d11">1.0</data>
+    </edge>
+    <edge source="arm_BICshort_Ia" target="arm_IaIn_BICshort">
+      <data key="d11">1.0</data>
+    </edge>
+    <edge source="arm_BICshort_C" target="arm_Mn_BICshort">
+      <data key="d11">1.0</data>
+    </edge>
+    <edge source="arm_BRA_Ia" target="arm_Mn_BRA">
+      <data key="d11">1.0</data>
+    </edge>
+    <edge source="arm_BRA_Ia" target="arm_IaIn_BRA">
+      <data key="d11">1.0</data>
+    </edge>
+    <edge source="arm_BRA_C" target="arm_Mn_BRA">
+      <data key="d11">1.0</data>
+    </edge>
+    <data key="d0">arm</data>
+  </graph>
+</graphml>

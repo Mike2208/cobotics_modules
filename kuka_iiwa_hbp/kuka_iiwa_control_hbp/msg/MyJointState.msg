@@ -1,0 +1,10 @@
+#std_msgs/Header header
+string[] name
+float64[] q_des
+float64[] qd_des
+float64[] qd_des_ik
+float64[] q_state
+float64[] qd_state
+float64[] e_q
+float64[] e_qd
+float64[] torque_cmd
