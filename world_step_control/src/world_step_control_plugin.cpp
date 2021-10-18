@@ -4,12 +4,24 @@
 #include <gazebo/physics/physics.hh>
 #include <rosgraph_msgs/Clock.h>
 
-// Register System plugin
-GZ_REGISTER_SYSTEM_PLUGIN(WorldStepControlPlugin);
+// Register World plugin
+GZ_REGISTER_WORLD_PLUGIN(WorldStepControlPlugin);
 
-void WorldStepControlPlugin::Load(int _argc, char **_argv)
+//void WorldStepControlPlugin::Load(int _argc, char **_argv)
+//{
+//	this->_conWorldCreated = gazebo::event::Events::ConnectWorldCreated(  std::bind(&WorldStepControlPlugin::OnWorldCreated, this, std::placeholders::_1));
+//	this->_conWorldStepEnd = gazebo::event::Events::ConnectWorldUpdateEnd(std::bind(&WorldStepControlPlugin::OnWorldStepEnd, this));
+//}
+
+//volatile bool waitForDebug = true;
+
+void WorldStepControlPlugin::Load(gazebo::physics::WorldPtr world, sdf::ElementPtr sdf)
 {
-	this->_conWorldCreated = gazebo::event::Events::ConnectWorldCreated(  std::bind(&WorldStepControlPlugin::OnWorldCreated, this, std::placeholders::_1));
+	//while(waitForDebug) {};
+
+	this->_world = world;
+
+	//this->_conWorldCreated = gazebo::event::Events::ConnectWorldCreated(  std::bind(&WorldStepControlPlugin::OnWorldCreated, this, std::placeholders::_1));
 	this->_conWorldStepEnd = gazebo::event::Events::ConnectWorldUpdateEnd(std::bind(&WorldStepControlPlugin::OnWorldStepEnd, this));
 }
 
@@ -33,6 +45,9 @@ void WorldStepControlPlugin::Init()
 
 	this->WorldStepControl::Init();
 	this->ModuleControl::Init();
+
+	// As this is now a WorldModule, this init function is the same as OnWorldCreated
+	this->OnWorldCreated(this->_world->Name());
 }
 
 void WorldStepControlPlugin::Reset()
@@ -46,13 +61,16 @@ void WorldStepControlPlugin::Reset()
 
 void WorldStepControlPlugin::OnWorldCreated(std::string worldName)
 {
-	this->_world = gazebo::physics::get_world(worldName);
-
 	// Wait for modules to register
 	const auto &missingModules = this->ModuleControl::WaitForModules(std::vector(this->_modules),
 	                                                                 &(this->_rworldClkPub),
 	                                                                 WorldStepControlPlugin::GetClkTime(),
 	                                                                 std::chrono::duration<double>::max());
+//	const auto &missingModules = this->ModuleControl::WaitForModules(std::vector(this->_modules),
+//	                                                                 nullptr,
+//	                                                                 WorldStepControlPlugin::GetClkTime(),
+//	                                                                 std::chrono::duration<double>::max());
+
 	if(!missingModules.empty())
 	{
 		ROS_WARN("Not all modules were initialized:");
@@ -64,7 +82,7 @@ void WorldStepControlPlugin::OnWorldCreated(std::string worldName)
 		throw std::runtime_error("Failed to initialize all modules");
 	}
 
-	ROS_ERROR("All Modules initialized");
+	//ROS_ERROR("All Modules initialized");
 }
 
 void WorldStepControlPlugin::OnWorldStepEnd()
@@ -74,6 +92,7 @@ void WorldStepControlPlugin::OnWorldStepEnd()
 	//this->_rworldClkPub.publish(clkMsg);
 
 	this->ModuleControl::UpdateModules(clkMsg.clock, &(this->_rworldClkPub));
+	//this->ModuleControl::UpdateModules(clkMsg.clock, nullptr);
 }
 
 rosgraph_msgs::Clock WorldStepControlPlugin::GetClkTime()

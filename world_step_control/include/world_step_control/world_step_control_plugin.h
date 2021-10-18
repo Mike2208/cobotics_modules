@@ -5,7 +5,7 @@
 #include "world_step_control/module_control.h"
 
 class WorldStepControlPlugin
-        : public gazebo::SystemPlugin,
+        : public gazebo::WorldPlugin,
           protected WorldStepControl,
           protected ModuleControl
 {
@@ -15,7 +15,8 @@ class WorldStepControlPlugin
 		WorldStepControlPlugin() = default;
 		virtual ~WorldStepControlPlugin() = default;
 
-		void Load(int _argc = 0, char **_argv = nullptr) override;
+		//void Load(int _argc = 0, char **_argv = nullptr) override;
+		void Load(gazebo::physics::WorldPtr world, sdf::ElementPtr sdf) override;
 
 		void Init() override;
 		void Reset() override;

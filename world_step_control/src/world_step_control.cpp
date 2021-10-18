@@ -16,6 +16,7 @@ void WorldStepControl::Init()
 {	
 	// Setup ROS Node
 	this->_rosNode.reset(new ros::NodeHandle(WorldStepControlPlugin::GazeboROSNodeName));
+	this->_rosNode->setCallbackQueue(&this->_rQueue);
 
 	// Create ROS service to step simulation
 	this->_rosStepSrv = this->_rosNode->advertiseService("/gazebo/world_control", &WorldStepControl::HandleStepService, this);
@@ -27,7 +28,7 @@ void WorldStepControl::Init()
 	this->_gzWCtrlPub = this->_gzNode->Advertise<gazebo::msgs::WorldControl>(GzWorldCtrlTopic);
 
 	// Make sure simulation is paused before startup
-	this->PauseSim();
+	//this->PauseSim();
 }
 
 void WorldStepControl::Shutdown()

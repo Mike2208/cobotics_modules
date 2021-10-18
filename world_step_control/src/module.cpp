@@ -101,7 +101,7 @@ void StepModule::initServices(const std::string &name)
 	if(!execResultTopic.empty() && execResultTopic.front() != '/')
 		execResultTopic = this->_rNode.getNamespace() + "/" + execResultTopic;
 
-	this->_rResultPub = this->_rNode.advertise<world_step_control::ModuleExecutionResult>(execResultTopic, 10);
+	this->_rResultPub = this->_rNode.advertise<world_step_control::ModuleExecutionResult>(execResultTopic, 10, true);
 
 	this->_rExecCall = this->_rNode.advertiseService(execSrvName, &StepModule::HandleExecutionCall, this);
 

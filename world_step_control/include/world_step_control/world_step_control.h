@@ -46,6 +46,11 @@ class WorldStepControl
 		std::unique_ptr<ros::NodeHandle> _rosNode;
 
 		/*!
+		 * \brief Callback queue for this simulation
+		 */
+		ros::CallbackQueue _rQueue;
+
+		/*!
 		 * \brief ROS Service to step simulation
 		 */
 		ros::ServiceServer _rosStepSrv;
