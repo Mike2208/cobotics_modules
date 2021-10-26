@@ -1356,9 +1356,10 @@
       </axis>
     </joint>
 
-        <plugin name="CoboticsSkeletonHighFivePlugin" filename="CoboticsSkeletonHighFivePlugin.so">
+        <plugin name="MuscleModelPlugin" filename="MuscleModelPlugin.so"/>
+        <!--<plugin name="CoboticsSkeletonHighFivePlugin" filename="CoboticsSkeletonHighFivePlugin.so">-->
             <!-- <target_link></target_link> -->
-        </plugin>
+        <!--</plugin>-->
 
       </model>
   </sdf>
