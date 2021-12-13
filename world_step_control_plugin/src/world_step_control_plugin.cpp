@@ -33,12 +33,12 @@ void WorldStepControlPlugin::Init()
 	{
 		int ros_argc = 0;
 		char **ros_argv = NULL;
-		ros::init(ros_argc, ros_argv, GazeboROSNodeName,
+		ros::init(ros_argc, ros_argv, world_step_control::GazeboROSNodeName,
 		          ros::init_options::NoSigintHandler);
 	}
 
 	// Get list of modules that must be retrieved before starting
-	auto rn = ros::NodeHandle(WorldStepControlPlugin::GazeboROSNodeName);
+	auto rn = ros::NodeHandle(world_step_control::GazeboROSNodeName);
 	rn.param("modules", this->_modules, decltype(this->_modules)());
 
 	this->_rworldClkPub = rn.advertise<rosgraph_msgs::Clock>("/clock", 1);

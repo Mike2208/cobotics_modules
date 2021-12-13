@@ -1,9 +1,10 @@
 #include "world_step_control/module_control.h"
 
-#include "world_step_control/world_step_control_plugin.h"
+#include "world_step_control/constants.h"
 
 #include <assert.h>
-#include <gazebo/gazebo.hh>
+#include <chrono>
+#include <mutex>
 
 static constexpr std::chrono::duration WaitTime = std::chrono::minutes(10);
 
@@ -20,7 +21,7 @@ ModuleControl::ModuleData::ModuleData(const std::string &name, const std::string
 void ModuleControl::Init()
 {
 	this->_rCbQueue.clear();
-	this->_rNode.reset(new ros::NodeHandle(WorldStepControlPlugin::GazeboROSNodeName));
+	this->_rNode.reset(new ros::NodeHandle(world_step_control::GazeboROSNodeName));
 	this->_rNode->setCallbackQueue(&this->_rCbQueue);
 
 	this->_rExecResults = this->_rNode->subscribe(ModuleControl::ExecTopicName, 100, &ModuleControl::HandleExecResult, this);
@@ -164,7 +165,7 @@ void ModuleControl::RunModule(const ModuleData *pModule, const ros::Time &startT
 	if(!execClient.call(req))
 	{
 		const auto errMsg = "Could not execute module \"" + pModule->Name + "\" with service \"" + pModule->Service + "\"";
-		gzerr << errMsg;
+		//gzerr << errMsg;
 		throw std::runtime_error(errMsg);
 	}
 }
@@ -213,7 +214,7 @@ bool ModuleControl::HandleRegisterModule(world_step_control::RegisterModuleReque
 	ModuleData *pData = this->FindModule(req.Name);
 	if(pData != nullptr)
 	{
-		gzwarn << "Module with name \"" << pData->Name << "\" already registered (Topic: \"" << pData->Service << "\"). Overrriding...\n";
+		//gzwarn << "Module with name \"" << pData->Name << "\" already registered (Topic: \"" << pData->Service << "\"). Overrriding...\n";
 
 		// Erase stored start times from queue for old module with same name
 		this->RemoveModuleFromQueue(pData);
@@ -270,7 +271,7 @@ void ModuleControl::HandleExecResult(const world_step_control::ModuleExecutionRe
 	const auto runModuleIt = this->_runningModules.find(this->FindModule(msg.ModuleName));
 	if(runModuleIt == this->_runningModules.end())
 	{
-		gzwarn << "Received result for module \"" << msg.ModuleName << "\", which is not supposed to be running\n";
+		//gzwarn << "Received result for module \"" << msg.ModuleName << "\", which is not supposed to be running\n";
 		return;
 	}
 

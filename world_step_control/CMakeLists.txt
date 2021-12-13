@@ -4,29 +4,27 @@ project(world_step_control)
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
 
+set (CMAKE_CXX_STANDARD 17)
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  gazebo_msgs
   message_generation
   roscpp
   rospy
   std_msgs
 )
 
-## Find Gazebo
-find_package(gazebo REQUIRED)
-
 ## System dependencies are found with CMake's conventions
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 find_package(Boost REQUIRED COMPONENTS python)
-
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
 catkin_python_setup()
+
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -77,29 +75,8 @@ add_service_files(
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
-  gazebo_msgs
   std_msgs
 )
-
-################################################
-## Declare ROS dynamic reconfigure parameters ##
-################################################
-
-## To declare and build dynamic reconfigure parameters within this
-## package, follow these steps:
-## * In the file package.xml:
-##   * add a build_depend and a exec_depend tag for "dynamic_reconfigure"
-## * In this file (CMakeLists.txt):
-##   * add "dynamic_reconfigure" to
-##     find_package(catkin REQUIRED COMPONENTS ...)
-##   * uncomment the "generate_dynamic_reconfigure_options" section below
-##     and list every .cfg file to be processed
-
-## Generate dynamic reconfigure parameters in the 'cfg' folder
-# generate_dynamic_reconfigure_options(
-#   cfg/DynReconf1.cfg
-#   cfg/DynReconf2.cfg
-# )
 
 ###################################
 ## catkin specific configuration ##
@@ -113,8 +90,8 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES world_step_control
-  CATKIN_DEPENDS gazebo_msgs std_msgs roscpp rospy message_runtime
-  DEPENDS GAZEBO
+  CATKIN_DEPENDS std_msgs roscpp rospy message_runtime
+  #DEPENDS
 )
 
 ###########
@@ -126,29 +103,20 @@ catkin_package(
 include_directories(
  include
   ${catkin_INCLUDE_DIRS}
-  ${GAZEBO_INCLUDE_DIRS}
 )
-
-# Gazebo configuration
-link_directories(${GAZEBO_LIBRARY_DIRS})
-#list(APPEND CMAKE_CXX_FLAGS "${GAZEBO_CXX_FLAGS}")
-
 
 ###
 # Module Control and World Stepping Library
 ###
 add_library(${PROJECT_NAME}
   src/module_control.cpp
-  src/world_step_control.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
   ${catkin_LIBRARIES}
-  ${GAZEBO_LIBRARIES}
 )
 
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
 
 ###
 # Step Module
@@ -175,51 +143,9 @@ target_link_libraries(PyStepModule
 	Boost::python)
 
 
-###
-# World Control Plugin
-###
-add_library(WorldStepControlPlugin
-  src/world_step_control_plugin.cpp
-)
-
-add_dependencies(WorldStepControlPlugin ${WorldStepControlPlugin_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-set_target_properties(WorldStepControlPlugin PROPERTIES PREFIX "")
-target_link_libraries(WorldStepControlPlugin ${PROJECT_NAME})
-
-## Add cmake target dependencies of the library
-## as an example, code may need to be generated before libraries
-## either from message generation or dynamic reconfigure
-
-## Declare a C++ executable
-set(NODE_NAME ${PROJECT_NAME}_node)
-
-## With catkin_make all packages are built within a single CMake context
-## The recommended prefix ensures that target names across packages don't collide
-add_executable(${NODE_NAME} src/world_step_control_node.cpp)
-
-## Rename C++ executable without prefix
-## The above recommended prefix causes long target names, the following renames the
-## target back to the shorter version for ease of user use
-## e.g. "rosrun someones_pkg node" instead of "rosrun someones_pkg someones_pkg_node"
-set_target_properties(${NODE_NAME} PROPERTIES OUTPUT_NAME world_step_control PREFIX "")
-
-## Add cmake target dependencies of the executable
-## same as for the library above
-add_dependencies(${NODE_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-## Specify libraries to link a library or executable target against
-target_link_libraries(${NODE_NAME}
-  ${PROJECT_NAME}
-  ${catkin_LIBRARIES}
-)
-
 #############
 ## Install ##
 #############
-
-# all install targets should use catkin DESTINATION variables
-# See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
@@ -228,15 +154,9 @@ catkin_install_python(PROGRAMS
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-## Mark executables for installation
-## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
-install(TARGETS ${NODE_NAME}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-
 ## Mark libraries for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_libraries.html
-install(TARGETS WorldStepControlPlugin StepModule
+install(TARGETS StepModule
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
@@ -248,20 +168,6 @@ install(DIRECTORY include/${PROJECT_NAME}/
   FILES_MATCHING PATTERN "*.h"
   PATTERN ".svn" EXCLUDE
 )
-
-## Mark other files for installation (e.g. launch and bag files, etc.)
-#install(FILES
-#  # myfile2
-#  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-#)
-
-# Set GAZEBO_PLUGIN_PATH to be changed on source
-configure_file(cmake/env_setup.sh.in "${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/env_hooks/10_gz_step_setup.sh" @ONLY)
-configure_file(cmake/env_setup.sh.in "${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/env_hooks/10_gz_step_setup.bash" @ONLY)
-configure_file(cmake/env_setup.sh.in "${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/env_hooks/10_gz_step_setup.zsh" @ONLY)
-configure_file(cmake/env_setup.sh.in "${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/env_hooks/10_gz_step_setup.tcsh" @ONLY)
-
-catkin_add_env_hooks(10_gz_step_setup SHELLS sh bash zsh tcsh DIRECTORY "${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_SHARE_DESTINATION}/env_hooks/")
 
 #############
 ## Testing ##

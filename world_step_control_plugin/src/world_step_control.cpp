@@ -15,7 +15,7 @@ WorldStepControl::~WorldStepControl()
 void WorldStepControl::Init()
 {	
 	// Setup ROS Node
-	this->_rosNode.reset(new ros::NodeHandle(WorldStepControlPlugin::GazeboROSNodeName));
+	this->_rosNode.reset(new ros::NodeHandle(world_step_control::GazeboROSNodeName));
 	this->_rosNode->setCallbackQueue(&this->_rQueue);
 
 	// Create ROS service to step simulation

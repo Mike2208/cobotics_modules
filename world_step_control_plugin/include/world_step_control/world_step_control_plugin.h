@@ -3,6 +3,7 @@
 
 #include "world_step_control/world_step_control.h"
 #include "world_step_control/module_control.h"
+#include "world_step_control/constants.h"
 
 class WorldStepControlPlugin
         : public gazebo::WorldPlugin,
@@ -10,8 +11,6 @@ class WorldStepControlPlugin
           protected ModuleControl
 {
 	public:
-		static constexpr auto GazeboROSNodeName = "gazebo";
-
 		WorldStepControlPlugin() = default;
 		virtual ~WorldStepControlPlugin() = default;
 
