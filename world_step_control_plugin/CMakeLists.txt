@@ -27,11 +27,11 @@ find_package(Boost REQUIRED COMPONENTS python)
 ################################################
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  world_step_control
-  std_msgs
-)
+#generate_messages(
+#  DEPENDENCIES
+#  world_step_control
+#  std_msgs
+#)
 
 ###################################
 ## catkin specific configuration ##
@@ -62,7 +62,9 @@ include_directories(
 )
 
 # Gazebo configuration
-link_directories(${GAZEBO_LIBRARY_DIRS})
+link_directories(
+  ${GAZEBO_LIBRARY_DIRS}
+  ${catkin_LIBRARY_DIRS})
 #list(APPEND CMAKE_CXX_FLAGS "${GAZEBO_CXX_FLAGS}")
 
 
@@ -76,6 +78,11 @@ add_library(WorldStepControlPlugin
 
 add_dependencies(WorldStepControlPlugin 
 	${WorldStepControlPlugin_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} ${world_step_control_EXPORTED_TARGETS})
+
+target_link_directories(WorldStepControlPlugin
+  PUBLIC
+  ${world_step_control_LIBRARY_DIRS}
+)
 
 set_target_properties(WorldStepControlPlugin PROPERTIES PREFIX "")
 target_link_libraries(WorldStepControlPlugin 
