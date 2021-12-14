@@ -89,7 +89,7 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES world_step_control
+  LIBRARIES world_step_control StepModule
   CATKIN_DEPENDS std_msgs roscpp rospy message_runtime
   #DEPENDS
 )
@@ -125,7 +125,7 @@ add_library(StepModule
 	src/module.cpp
 )
 
-add_dependencies(StepModule ${StepModule_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(StepModule ${${PROJECT_NAME}_EXPORTED_TARGETS} ${StepModule_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 #set_target_properties(StepModule PROPERTIES PREFIX "")
 target_link_libraries(StepModule ${PROJECT_NAME})

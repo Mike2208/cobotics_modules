@@ -179,6 +179,7 @@ link_directories(
   ${Boost_LIBRARY_DIRS}
   ${CUDA_LIB_PATH}
   ${GAZEBO_LIBRARY_DIRS}
+  ${world_step_control_LIBRARY_DIRS}
 )
 
 ## Declare a C++ library
@@ -248,7 +249,7 @@ add_dependencies(error_estimator_node_compact edlut_ros_osim_generate_messages_c
 add_dependencies(spike_decoder_node_compact edlut_ros_osim_generate_messages_cpp)
 add_dependencies(spike_decoder_node_compact_agonist_antagonist edlut_ros_osim_generate_messages_cpp)
 add_dependencies(spike_decoder_node_compact_future_torque edlut_ros_osim_generate_messages_cpp)
-add_dependencies(synchronizer_node edlut_ros_osim_generate_messages_cpp world_step_control_generate_messages_cpp world_step_control)
+add_dependencies(synchronizer_node edlut_ros_osim_generate_messages_cpp world_step_control_generate_messages_cpp world_step_control_generate_messages_cpp)
 add_dependencies(q_trajectory_generator_node_compactDelay edlut_ros_osim_generate_messages_cpp)
 add_dependencies(q_trajectory_generator_node_compactDelay_and_muscle_activation edlut_ros_osim_generate_messages_cpp)
 add_dependencies(full_state_node edlut_ros_osim_generate_messages_cpp)
@@ -296,6 +297,7 @@ target_link_libraries(synchronizer_node
   ${catkin_LIBRARIES}
   ${GAZEBO_LIBRARIES}
   baxter_interface
+  world_step_control
   StepModule
 )
 
